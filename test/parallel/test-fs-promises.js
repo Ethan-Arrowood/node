@@ -336,37 +336,42 @@ async function executeOnHandle(dest, func) {
       await unlink(newFile);
     }
 
+    // IGNORE FOR NOW
+    // See `parallel/test-fs-readdir-recursive.js` for sync/async API design
+    // Once that part is finalized I will move on to the promise version
+    //
     // Testing readdir recursivly lists both files and directories
-    {
-      const fileStructure = [
-        'a',
-        ['foo', ['b','c']],
-        ['bar', [['fuzz', ['d']], 'e']]
-      ]
-      // Create file structure
-      async function createFiles (path, fileStructure) {
-        for (const fileOrDir of fileStructure) {
-          if (typeof fileOrDir === 'string') {
-            await (await open(`${path}/${fileOrDir}`, 'w')).close();
-          } else {
-            await mkdir(`${path}/${fileOrDir[0]}`);
-            await createFiles(`${path}/${fileOrDir[0]}`, fileOrDir[1]);
-          }
-        }
-      }
+    // {
+    //   const fileStructure = [
+    //     'a',
+    //     ['foo', ['b', 'c']],
+    //     ['bar', [['fuzz', ['d']], 'e']],
+    //   ];
+    //   // Create file structure
+    //   async function createFiles(path, fileStructure) {
+    //     for (const fileOrDir of fileStructure) {
+    //       if (typeof fileOrDir === 'string') {
+    //         await (await open(`${path}/${fileOrDir}`, 'w')).close();
+    //       } else {
+    //         await mkdir(`${path}/${fileOrDir[0]}`);
+    //         await createFiles(`${path}/${fileOrDir[0]}`, fileOrDir[1]);
+    //       }
+    //     }
+    //   }
 
-      await createFiles(tmpDir, fileStructure)
+    //   await createFiles(tmpDir, fileStructure);
 
-      const expected = [ 'a', 'bar/e', 'bar/fuzz/d', 'foo/b', 'foo/c' ]
+    //   const expected = [ 'a', 'bar/e', 'bar/fuzz/d', 'foo/b', 'foo/c' ];
 
-      // resolve all at once
-      assert.deepStrictEqual(expected, (await readdir(tmpDir, { recursive: true })).sort());
+    //   // resolve all at once
+    //   assert.deepStrictEqual(expected,
+    //     (await readdir(tmpDir, { recursive: true })).sort());
 
-      // step through as an async generator
-      for await (const path of readdir(tmpDir, { recursive: true })) {
-        assert.notStrictEqual(expected.indexOf(path), -1)
-      }
-    }
+    //   // Step through as an async generator
+    //   for await (const path of readdir(tmpDir, { recursive: true })) {
+    //     assert.notStrictEqual(expected.indexOf(path), -1);
+    //   }
+    // }
 
     // Use fallback encoding when input is null
     {
