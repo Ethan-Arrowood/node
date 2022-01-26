@@ -92,7 +92,6 @@ const defaultExpected = [
   fs.readdir(readdirDir, { recursive: true }, common.mustSucceed((f) => {
     assert.deepStrictEqual(defaultExpected, f.sort());
   }));
-
 }
 
 {
@@ -108,7 +107,17 @@ const defaultExpected = [
   });
   assertDirents(defaultExpected, resultDirents.sort());
 
-  // TODO: async
+  // async
+  fs.readdir(
+    readdirDir,
+    {
+      recursive: true,
+      withFileTypes: true
+    },
+    common.mustSucceed((resultDirents) => {
+      assertDirents(defaultExpected, resultDirents.sort());
+    })
+  );
 }
 
 {
@@ -125,7 +134,15 @@ const defaultExpected = [
   const result = processStream(resultStream);
   assert.deepStrictEqual(defaultExpected, result.sort());
 
-  // TODO: async
+  // async
+  fs.readdir(
+    readdirDir,
+    { recursive: { result: 'stream' } },
+    common.mustSucceed((resultStream) => {
+      const result = processStream(resultStream);
+      assert.deepStrictEqual(defaultExpected, result.sort());
+    })
+  );
 }
 
 {
@@ -142,152 +159,13 @@ const defaultExpected = [
   const resultDirents = processStream(resultStream);
   assertDirents(defaultExpected, resultDirents.sort());
 
-  // TODO: async
-}
-
-// Depth First Cases
-
-const depthFirstExpected = [/** TODO */];
-
-{
-  /**
-   * depth-first case:
-   * - returns a list of file paths in a depth-first order
-   */
-
-  // sync
-  assert.deepStrictEqual(
-    depthFirstExpected,
-    fs.readdirSync(readdirDir, { recursive: { algorithm: 'depth-first' } })
-  );
-
-  // TODO: async
-}
-
-{
-  /**
-   * depth-first withFileTypes case:
-   * - returns a list of fs.Dirent objects in a depth-first order
-   */
-
-  // sync
-  const resultDirents = fs.readdirSync(
+  // async
+  fs.readdir(
     readdirDir,
-    {
-      recursive: { algorithm: 'depth-first' },
-      withFileTypes: true
-    }
+    { recursive: { result: 'stream' }, withFileTypes: true },
+    common.mustSucceed((resultStream) => {
+      const resultDirents = processStream(resultStream);
+      assertDirents(defaultExpected, resultDirents.sort());
+    })
   );
-  assertDirents(depthFirstExpected, resultDirents);
-
-  // TODO: async
-}
-
-{
-  /**
-   * depth-first stream case:
-   * - returns a readable stream of file paths in a depth-first order
-   */
-
-  // sync
-  const resultStream = fs.readdirSync(
-    readdirDir,
-    { recursive: { algorithm: 'depth-first', result: 'stream' } }
-  );
-  const result = processStream(resultStream);
-  assert.deepStrictEqual(depthFirstExpected, result);
-
-  // TODO: async
-}
-
-{
-  /**
-   * depth-first stream and withFileTypes case:
-   * - returns a readable stream of file paths in a depth-first order
-   */
-
-  // sync
-  const resultStream = fs.readdirSync(
-    readdirDir,
-    {
-      recursive: { algorithm: 'depth-first', result: 'stream' },
-      withFileTypes: true
-    }
-  );
-  const resultDirents = processStream(resultStream);
-  assertDirents(depthFirstExpected, resultDirents);
-
-  // TODO: async
-}
-
-// Breadth First Cases
-
-const breadthFirstExpected = [/** TODO */];
-
-{
-  /**
-   * breadth-first case:
-   * - returns a list of file paths in a breadth-first order
-   */
-
-  // sync
-  assert.deepStrictEqual(
-    breadthFirstExpected,
-    fs.readdirSync(readdirDir, { recursive: { algorithm: 'breadth-first' } })
-  );
-
-  // TODO: async
-}
-
-{
-  /**
-   * breadth-first withFileTypes case:
-   * - returns a list of fs.Dirent objects in a breadth-first order
-   */
-
-  // sync
-  const resultDirents = fs.readdirSync(
-    readdirDir,
-    { recursive: { algorithm: 'breadth-first' }, withFileTypes: true }
-  );
-  assertDirents(breadthFirstExpected, resultDirents);
-
-  // TODO: async
-}
-
-{
-  /**
-   * breadth-first stream case:
-   * - returns a readable stream of file paths in a depth-first order
-   */
-
-  // sync
-  const resultStream = fs.readdirSync(
-    readdirDir,
-    { recursive: { algorithm: 'breadth-first', result: 'stream' } }
-  );
-  const result = processStream(resultStream);
-  assert.deepStrictEqual(breadthFirstExpected, result);
-
-  // TODO: async
-}
-
-{
-  /**
-   * breadth-first stream and withFileTypes case:
-   * - returns a readable stream of file paths in a breadth-first order
-   */
-
-  // sync
-  const resultStream = fs.readdirSync(
-    readdirDir,
-    {
-      recursive: { algorithm: 'breadth-first', result: 'stream' },
-      withFileTypes: true
-    }
-  );
-  const resultDirents = processStream(resultStream);
-  assertDirents(breadthFirstExpected, resultDirents);
-
-  // TODO: async
 }
