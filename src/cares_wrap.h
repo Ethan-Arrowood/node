@@ -155,7 +155,8 @@ class ChannelWrap final : public AsyncWrap {
       Environment* env,
       v8::Local<v8::Object> object,
       int timeout,
-      int tries);
+      int tries,
+      int ttl);
   ~ChannelWrap() override;
 
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -190,6 +191,7 @@ class ChannelWrap final : public AsyncWrap {
   bool library_inited_ = false;
   int timeout_;
   int tries_;
+  int ttl_;
   int active_query_count_ = 0;
   NodeAresTask::List task_list_;
 };

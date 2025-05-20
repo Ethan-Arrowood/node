@@ -791,10 +791,12 @@ ChannelWrap::ChannelWrap(
       Environment* env,
       Local<Object> object,
       int timeout,
-      int tries)
+      int tries,
+      int ttl)
     : AsyncWrap(env, object, PROVIDER_DNSCHANNEL),
       timeout_(timeout),
-      tries_(tries) {
+      tries_(tries),
+      ttl_(ttl) {
   MakeWeak();
 
   Setup();
@@ -808,13 +810,15 @@ void ChannelWrap::MemoryInfo(MemoryTracker* tracker) const {
 
 void ChannelWrap::New(const FunctionCallbackInfo<Value>& args) {
   CHECK(args.IsConstructCall());
-  CHECK_EQ(args.Length(), 2);
+  CHECK_EQ(args.Length(), 3);
   CHECK(args[0]->IsInt32());
   CHECK(args[1]->IsInt32());
+  CHECK(args[2]->IsInt32());
   const int timeout = args[0].As<Int32>()->Value();
   const int tries = args[1].As<Int32>()->Value();
+  const int ttl = args[2].As<Int32>()->Value();
   Environment* env = Environment::GetCurrent(args);
-  new ChannelWrap(env, args.This(), timeout, tries);
+  new ChannelWrap(env, args.This(), timeout, tries, ttl);
 }
 
 GetAddrInfoReqWrap::GetAddrInfoReqWrap(Environment* env,
@@ -866,7 +870,7 @@ void ChannelWrap::Setup() {
   options.sock_state_cb_data = this;
   options.timeout = timeout_;
   options.tries = tries_;
-  options.qcache_max_ttl = 0;
+  options.qcache_max_ttl = ttl_;
 
   int r;
   if (!library_inited_) {
@@ -881,7 +885,7 @@ void ChannelWrap::Setup() {
   /* We do the call to ares_init_option for caller. */
   const int optmask =
       ARES_OPT_FLAGS | ARES_OPT_TIMEOUTMS |
-      ARES_OPT_SOCK_STATE_CB | ARES_OPT_TRIES;
+      ARES_OPT_SOCK_STATE_CB | ARES_OPT_TRIES | ARES_OPT_QUERY_CACHE;
   r = ares_init_options(&channel_, &options, optmask);
 
   if (r != ARES_SUCCESS) {
